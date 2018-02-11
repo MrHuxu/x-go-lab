@@ -40,11 +40,8 @@ func (e *Engine) Post(path string, handler Handler) {
 	}
 }
 
-func (e *Engine) bindRouter() {
-	println("Hello World")
-	http.HandleFunc("*", func(w http.ResponseWriter, r *http.Request) {
-		println(r.URL.Path)
-	})
+func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	println("test test")
 }
 
 func (e *Engine) storeRoute(patterns []string, method string, handler Handler) {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/MrHuxu/x-go-lib/web"
+	"github.com/MrHuxu/x-go-lab/web"
 )
 
 func main() {

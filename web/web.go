@@ -15,7 +15,7 @@ func (e *Engine) Run(port int) {
 	e.Port = port
 
 	str := strconv.Itoa(port)
-	log.Fatal(http.ListenAndServe(":"+str, nil))
+	log.Fatal(http.ListenAndServe(":"+str, e))
 }
 
 func DefaultServer() *Engine {
@@ -25,6 +25,5 @@ func DefaultServer() *Engine {
 			Children: map[string]*EndPoint{"/": defaultIndexEntPoint},
 		},
 	}
-	engine.bindRouter()
 	return engine
 }
