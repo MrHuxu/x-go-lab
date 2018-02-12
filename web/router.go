@@ -5,20 +5,22 @@ import (
 	"strings"
 )
 
+const routeUndefined = "Route undefined"
+
 type Handler func(http.ResponseWriter, *http.Request)
 
-type EndPoint struct {
-	Funcs    map[string]Handler
-	Children map[string]*EndPoint
+type Router struct {
+	handlers map[string]Handler
+	children map[string]*Router
 }
 
-var defaultIndexEndPoint = &EndPoint{
-	Funcs: map[string]Handler{
+var defaultIndexRouter = &Router{
+	handlers: map[string]Handler{
 		"GET": func(w http.ResponseWriter, r *http.Request) {
-			panic("Router undefined")
+			w.Write([]byte(routeUndefined))
 		},
 	},
-	Children: make(map[string]*EndPoint),
+	children: make(map[string]*Router),
 }
 
 func (e *Engine) Get(path string, handler Handler) {
@@ -31,20 +33,20 @@ func (e *Engine) Post(path string, handler Handler) {
 
 func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	patterns := getPatterns(r.URL.Path)
-	endPoint := e.Router.Children["/"]
+	router := e.router.children["/"]
 	for _, pattern := range patterns {
-		if _, ok := endPoint.Children[pattern]; !ok {
-			w.Write([]byte("Router not found"))
+		if _, ok := router.children[pattern]; !ok {
+			w.Write([]byte(routeUndefined))
 			return
 		}
-		endPoint = endPoint.Children[pattern]
+		router = router.children[pattern]
 	}
 
-	if _, ok := endPoint.Funcs[r.Method]; !ok {
-		w.Write([]byte("Router not found"))
+	if _, ok := router.handlers[r.Method]; !ok {
+		w.Write([]byte(routeUndefined))
 		return
 	}
-	endPoint.Funcs[r.Method](w, r)
+	router.handlers[r.Method](w, r)
 }
 
 func getPatterns(path string) []string {
@@ -56,16 +58,16 @@ func getPatterns(path string) []string {
 }
 
 func (e *Engine) storeRoute(patterns []string, method string, handler Handler) {
-	var endPoint = e.Router.Children["/"]
+	var router = e.router.children["/"]
 	for _, pattern := range patterns {
-		_, ok := endPoint.Children[pattern]
+		_, ok := router.children[pattern]
 		if !ok {
-			endPoint.Children[pattern] = &EndPoint{
-				Funcs:    make(map[string]Handler),
-				Children: make(map[string]*EndPoint),
+			router.children[pattern] = &Router{
+				handlers: make(map[string]Handler),
+				children: make(map[string]*Router),
 			}
 		}
-		endPoint = endPoint.Children[pattern]
+		router = router.children[pattern]
 	}
-	endPoint.Funcs[method] = handler
+	router.handlers[method] = handler
 }

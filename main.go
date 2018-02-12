@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	svr := web.DefaultServer()
+	svr := web.DefaultEngine()
 
 	svr.Get("/test/get", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("test get work"))

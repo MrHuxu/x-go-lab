@@ -7,22 +7,19 @@ import (
 )
 
 type Engine struct {
-	Port   int
-	Router *EndPoint
+	router *Router
 }
 
 func (e *Engine) Run(port int) {
-	e.Port = port
-
 	str := strconv.Itoa(port)
 	log.Fatal(http.ListenAndServe(":"+str, e))
 }
 
-func DefaultServer() *Engine {
+func DefaultEngine() *Engine {
 	engine := &Engine{
-		Router: &EndPoint{
-			Funcs:    make(map[string]Handler),
-			Children: map[string]*EndPoint{"/": defaultIndexEndPoint},
+		router: &Router{
+			handlers: make(map[string]Handler),
+			children: map[string]*Router{"/": defaultIndexRouter},
 		},
 	}
 	return engine
