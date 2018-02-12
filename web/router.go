@@ -12,36 +12,47 @@ type EndPoint struct {
 	Children map[string]*EndPoint
 }
 
-var defaultIndexEntPoint = &EndPoint{
+var defaultIndexEndPoint = &EndPoint{
 	Funcs: map[string]Handler{
 		"GET": func(w http.ResponseWriter, r *http.Request) {
 			panic("Router undefined")
 		},
 	},
+	Children: make(map[string]*EndPoint),
 }
 
 func (e *Engine) Get(path string, handler Handler) {
-	patternString := strings.Trim(path, "/")
-	if len(patternString) == 0 {
-		e.storeRoute([]string{}, "GET", handler)
-	} else {
-		patterns := strings.Split(patternString, "/")
-		e.storeRoute(patterns, "GET", handler)
-	}
+	e.storeRoute(getPatterns(path), "GET", handler)
 }
 
 func (e *Engine) Post(path string, handler Handler) {
-	patternString := strings.Trim(path, "/")
-	if len(patternString) == 0 {
-		e.storeRoute([]string{}, "POST", handler)
-	} else {
-		patterns := strings.Split(patternString, "/")
-		e.storeRoute(patterns, "POST", handler)
-	}
+	e.storeRoute(getPatterns(path), "POST", handler)
 }
 
 func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	println("test test")
+	patterns := getPatterns(r.URL.Path)
+	endPoint := e.Router.Children["/"]
+	for _, pattern := range patterns {
+		if _, ok := endPoint.Children[pattern]; !ok {
+			w.Write([]byte("Router not found"))
+			return
+		}
+		endPoint = endPoint.Children[pattern]
+	}
+
+	if _, ok := endPoint.Funcs[r.Method]; !ok {
+		w.Write([]byte("Router not found"))
+		return
+	}
+	endPoint.Funcs[r.Method](w, r)
+}
+
+func getPatterns(path string) []string {
+	patternString := strings.Trim(path, "/")
+	if len(patternString) == 0 {
+		return []string{}
+	}
+	return strings.Split(patternString, "/")
 }
 
 func (e *Engine) storeRoute(patterns []string, method string, handler Handler) {

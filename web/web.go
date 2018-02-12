@@ -22,7 +22,7 @@ func DefaultServer() *Engine {
 	engine := &Engine{
 		Router: &EndPoint{
 			Funcs:    make(map[string]Handler),
-			Children: map[string]*EndPoint{"/": defaultIndexEntPoint},
+			Children: map[string]*EndPoint{"/": defaultIndexEndPoint},
 		},
 	}
 	return engine
