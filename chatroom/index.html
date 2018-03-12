@@ -1,0 +1,87 @@
+<html>
+<style>
+  * {
+    margin: 0;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  #messages {
+    height: calc(100% - 60px);
+    background-color: aquamarine;
+  }
+
+  #message {
+    font-size: 20px;
+    color: teal;
+    background-color:oldlace;
+    padding: 10px 20px;
+    margin: 0 0 10px 0;
+  }
+
+  #typing {
+    position: relative;
+    height: 60px;
+    background-color: aqua;
+  }
+
+  #typing * {
+    position: absolute;
+    height: 40px;
+  }
+
+  #typing>input {
+    top: 10px;
+    left: 1%;
+    width: 84%;
+    font-size: 23px;
+    color: coral;
+  }
+
+  #typing>button {
+    top: 10px;
+    right: 1%;
+    width: calc(14% - 10px);
+  }
+</style>
+
+<body>
+  <div id="messages">
+
+  </div>
+  <div id="typing">
+    <input onkeypress='pressKey(event)'/>
+    <button onclick='sendMsg()'> Send </button>
+  </div>
+</body>
+
+<script>
+  const socket = new WebSocket('ws://localhost:8080');
+
+  socket.addEventListener('open', function (event) {
+    console.info("connection built");
+  });
+
+  socket.addEventListener('message', function (event) {
+    const msg = document.createElement('div');
+    msg.id = 'message';
+    msg.innerText = event.data;
+    document.getElementById('messages').appendChild(msg);
+  });
+
+  const pressKey= event => {
+    if (event.which == 13 || event.keyCode == 13) sendMsg();
+  };
+
+  const sendMsg = () => {
+    const input = document.getElementsByTagName('input')[0];
+    socket.send(input.value);
+    input.value = '';
+    input.focus();
+  }
+</script>
+
+</html>
