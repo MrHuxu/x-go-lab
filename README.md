@@ -1,4 +1,4 @@
-X Go Lab
+# X Go Lab
 
 A repo of lab projects of xhu
 
