@@ -18,9 +18,9 @@ var upgrader = &websocket.Upgrader{
 var mutex sync.RWMutex
 var conns = make(map[*websocket.Conn]bool)
 
-func openConn(conn *websocket.Conn, status bool) {
+func openConn(conn *websocket.Conn) {
 	mutex.Lock()
-	conns[conn] = status
+	conns[conn] = true
 	mutex.Unlock()
 }
 
@@ -54,7 +54,7 @@ func pushMsg() {
 }
 
 func handleWebsocket(conn *websocket.Conn) {
-	openConn(conn, true)
+	openConn(conn)
 
 	for {
 		_, msg, err := conn.ReadMessage()
