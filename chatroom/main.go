@@ -18,9 +18,15 @@ var mutex sync.RWMutex
 var msgq = make(chan []byte, 1000)
 var conns = make(map[*websocket.Conn]bool)
 
-func triggerConn(conn *websocket.Conn, status bool) {
+func openConn(conn *websocket.Conn, status bool) {
 	mutex.Lock()
 	conns[conn] = status
+	mutex.Unlock()
+}
+
+func closeConn(conn *websocket.Conn) {
+	mutex.Lock()
+	delete(conns, conn)
 	mutex.Unlock()
 }
 
@@ -30,11 +36,9 @@ func pushMsg() {
 		case msg := <-msgq:
 			fmt.Println(string(msg))
 			mutex.RLock()
-			for conn, ok := range conns {
-				if ok {
-					if err := conn.WriteMessage(1, msg); err != nil {
-						triggerConn(conn, false)
-					}
+			for conn := range conns {
+				if err := conn.WriteMessage(1, msg); err != nil {
+					closeConn(conn)
 				}
 			}
 			mutex.RUnlock()
@@ -43,12 +47,12 @@ func pushMsg() {
 }
 
 func handleWebsocket(conn *websocket.Conn) {
-	triggerConn(conn, true)
+	openConn(conn, true)
 
 	for {
 		messageType, msg, err := conn.ReadMessage()
 		if err != nil {
-			triggerConn(conn, false)
+			closeConn(conn)
 			fmt.Println("connection closed")
 			return
 		}
