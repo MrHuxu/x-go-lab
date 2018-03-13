@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
+	"log"
 	"net"
 	"net/http"
 	"sync"
@@ -41,7 +41,7 @@ func pushMsg() {
 	for {
 		select {
 		case msg := <-msgq:
-			fmt.Printf("message from %v received and broadcasted: %s\n", msg.addr, string(msg.content))
+			log.Printf("message from %v received and broadcasted: %s\n", msg.addr, string(msg.content))
 			mutex.RLock()
 			for conn := range conns {
 				if err := conn.WriteMessage(1, msg.content); err != nil {
@@ -60,7 +60,7 @@ func handleWebsocket(conn *websocket.Conn) {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			closeConn(conn)
-			fmt.Println("connection closed")
+			log.Println("connection closed")
 			return
 		}
 		msgq <- message{addr: conn.RemoteAddr(), content: msg}
@@ -74,7 +74,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 func serveWS(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Printf("error in building websocket connection: %v", err)
+		log.Printf("error in building websocket connection: %v", err)
 		return
 	}
 
