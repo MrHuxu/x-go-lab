@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
+	"net"
 	"net/http"
 	"sync"
 )
@@ -15,7 +16,6 @@ var upgrader = &websocket.Upgrader{
 	},
 }
 var mutex sync.RWMutex
-var msgq = make(chan []byte, 1000)
 var conns = make(map[*websocket.Conn]bool)
 
 func openConn(conn *websocket.Conn, status bool) {
@@ -30,14 +30,21 @@ func closeConn(conn *websocket.Conn) {
 	mutex.Unlock()
 }
 
+type message struct {
+	addr    net.Addr
+	content []byte
+}
+
+var msgq = make(chan message, 1000)
+
 func pushMsg() {
 	for {
 		select {
 		case msg := <-msgq:
-			fmt.Println(string(msg))
+			fmt.Printf("message from %v received and broadcasted: %s\n", msg.addr, string(msg.content))
 			mutex.RLock()
 			for conn := range conns {
-				if err := conn.WriteMessage(1, msg); err != nil {
+				if err := conn.WriteMessage(1, msg.content); err != nil {
 					closeConn(conn)
 				}
 			}
@@ -50,20 +57,21 @@ func handleWebsocket(conn *websocket.Conn) {
 	openConn(conn, true)
 
 	for {
-		messageType, msg, err := conn.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			closeConn(conn)
 			fmt.Println("connection closed")
 			return
 		}
-		fmt.Printf("message type: %d, message: %s", messageType, string(msg))
-		msgq <- msg
+		msgq <- message{addr: conn.RemoteAddr(), content: msg}
 	}
 }
 
-type defaultHandler struct{}
+func serveHome(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "index.html")
+}
 
-func (h *defaultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func serveWS(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Printf("error in building websocket connection: %v", err)
@@ -75,5 +83,8 @@ func (h *defaultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	go pushMsg()
-	http.ListenAndServe("127.0.0.1:8080", &defaultHandler{})
+
+	http.HandleFunc("/", serveHome)
+	http.HandleFunc("/chat", serveWS)
+	http.ListenAndServe(":8080", nil)
 }
