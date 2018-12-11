@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-test
+spec:
+  selector:
+    matchLabels:
+      app: kube-test
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: kube-test
+    spec:
+      containers:
+      - name: kube-test
+        image: kube-test:v1
+        ports:
+        - containerPort: 11011
