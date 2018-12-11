@@ -26,6 +26,6 @@ func init() {
 	etcdClient = cli
 }
 
-func convertValueToHost(value string) string {
+func convertKeyToHost(value string) string {
 	return strings.Split(value, etcdPrefix+":")[1]
 }

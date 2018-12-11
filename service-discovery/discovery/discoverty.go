@@ -1,9 +1,12 @@
 package discovery
 
 import (
+	"context"
 	"log"
 	"sync"
 
+	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/mvcc/mvccpb"
 	"stathat.com/c/consistent"
 )
 
@@ -17,14 +20,8 @@ func New(fn newEndpointFunc) Discovery {
 		mapHostToEndpoint: make(map[string]Endpoint),
 		consistent:        consistent.New(),
 	}
-
-	hosts, err := listAllHosts()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, host := range hosts {
-		d.addEndpoint(host)
-	}
+	d.refreshEndpoints()
+	go d.monitorEndpoints()
 
 	return d
 }
@@ -49,6 +46,33 @@ func (d *discovery) Get(key string) Endpoint {
 		log.Fatal("endpoint not found")
 	}
 	return d.mapHostToEndpoint[host]
+}
+
+func (d *discovery) refreshEndpoints() {
+	response, err := etcdClient.Get(context.Background(), etcdPrefix, clientv3.WithPrefix())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, kv := range response.Kvs {
+		d.addEndpoint(convertKeyToHost(string(kv.Key)))
+	}
+}
+
+func (d *discovery) monitorEndpoints() {
+	watchCh := etcdClient.Watch(context.Background(), etcdPrefix, clientv3.WithPrefix())
+
+	for response := range watchCh {
+		event := response.Events[1]
+
+		switch event.Type {
+		case mvccpb.PUT:
+			d.addEndpoint(convertKeyToHost(string(event.Kv.Key)))
+
+		case mvccpb.DELETE:
+			d.delEndpoint(convertKeyToHost(string(event.Kv.Key)))
+		}
+	}
 }
 
 func (d *discovery) addEndpoint(host string) {
