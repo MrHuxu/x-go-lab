@@ -63,7 +63,7 @@ func (d *discovery) monitorEndpoints() {
 	watchCh := etcdClient.Watch(context.Background(), etcdPrefix, clientv3.WithPrefix())
 
 	for response := range watchCh {
-		event := response.Events[1]
+		event := response.Events[0]
 
 		switch event.Type {
 		case mvccpb.PUT:

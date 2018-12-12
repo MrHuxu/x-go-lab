@@ -2,3 +2,5 @@
 debug
 node_modules/
 vendor
+default.etcd
+nohup.out
