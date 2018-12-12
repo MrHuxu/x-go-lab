@@ -1,6 +1,6 @@
 # Service Discovery
 
-A experimental project about service discovery.
+An experimental project about service discovery.
 
 ## Dependencies
 
@@ -9,22 +9,22 @@ A experimental project about service discovery.
 
 ## Submodules
 
-1. `proto`: service definitions
-2. `discovery`: implementation of service discovery
-3. `server`: launch and register/unregister services, the program has two flags:
-      - `port`: port of the TCP server
-      - `sign`: signature of the service
-4. `client`: launch several clients to request registerd servers concurrently
+1. `proto`: Service definitions.
+2. `discovery`: Implementation of service discovery.
+3. `server`: Launch and register/unregister services, the program has two flags:
+      - `port`: Port of the TCP server.
+      - `sign`: Signature of the service.
+4. `client`: Launch several clients to request registerd servers concurrently.
 
 ## Usage
 
-1. Launch `etcd` and make it run on port `2379`
+1. Launch `etcd` and make it run on port `2379`.
 
-2. Enter directory `client`
+2. Enter directory `client`.
 
         go run main.go
 
-3. Enter directory `server` and lauch several instances
+3. Enter directory `server` and lauch several instances.
 
         go run main.go -port=1234 -sign=1
         go run main.go -port=1235 -sign=2
