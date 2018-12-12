@@ -12,8 +12,8 @@ A experimental project about service discovery.
 1. `proto`: service definitions
 2. `discovery`: implementation of service discovery
 3. `server`: launch and register/unregister services, the program has two flags:
-      - port: port of the TCP server
-      - sign: signature of the service
+      - `port`: port of the TCP server
+      - `sign`: signature of the service
 4. `client`: launch several clients to request registerd servers concurrently
 
 ## Usage
