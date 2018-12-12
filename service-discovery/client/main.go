@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/MrHuxu/x-go-lab/service-discovery/discovery"
@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	service = "Server.SayHello"
+	funcName = "Service.SayHello"
 )
 
 func main() {
@@ -20,20 +20,40 @@ func main() {
 	for {
 		fmt.Println("\x1Bc")
 
+		var wg sync.WaitGroup
 		for i := 0; i < 10; i++ {
-			endpoint := d.Get(strconv.Itoa(i))
-			client := endpoint.Client()
+			wg.Add(1)
 
-			var (
-				args  = hello.Args{Seq: i}
-				reply hello.Reply
-			)
-			if err := client.Call(service, args, &reply); err != nil {
-				log.Fatal("arith error:", err)
-			}
-			fmt.Println(args, reply)
+			go func(i int) {
+				defer wg.Done()
+				invokeService(d, i)
+			}(i)
 		}
 
+		wg.Wait()
 		time.Sleep(time.Second * 2)
 	}
+}
+
+func invokeService(d discovery.Discovery, seq int) {
+	endpoint, err := d.Get(strconv.Itoa(seq))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	client, err := endpoint.Client()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	var (
+		args  = hello.Args{Seq: seq}
+		reply hello.Reply
+	)
+	if err := client.Call(funcName, args, &reply); err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(args, reply)
 }

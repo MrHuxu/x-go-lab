@@ -32,7 +32,7 @@ func parseArgs() {
 }
 
 func launchServer() {
-	helloServer := &hello.Server{Sign: sign}
+	helloServer := &hello.Service{Sign: sign}
 	rpc.Register(helloServer)
 	rpc.HandleHTTP()
 	l, e := net.Listen("tcp", ":"+port)
@@ -42,6 +42,7 @@ func launchServer() {
 	go http.Serve(l, nil)
 
 	discovery.Register("localhost:" + port)
+	println("service registered.")
 }
 
 func hangServer() {

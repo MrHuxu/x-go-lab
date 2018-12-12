@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"errors"
 	"log"
 	"sync"
 
@@ -10,10 +11,12 @@ import (
 	"stathat.com/c/consistent"
 )
 
+// Discovery defines the interface that discovery needs to implement
 type Discovery interface {
-	Get(string) Endpoint
+	Get(string) (Endpoint, error)
 }
 
+// New creates a instance of Discovery
 func New(fn newEndpointFunc) Discovery {
 	d := &discovery{
 		newEndpointFunc:   fn,
@@ -35,17 +38,17 @@ type discovery struct {
 	lock              sync.RWMutex
 }
 
-func (d *discovery) Get(key string) Endpoint {
+func (d *discovery) Get(key string) (Endpoint, error) {
 	d.consistent.Get(key)
 	host, err := d.consistent.Get(key)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	if _, ok := d.mapHostToEndpoint[host]; !ok {
-		log.Fatal("endpoint not found")
+		return nil, errors.New("endpoint not found")
 	}
-	return d.mapHostToEndpoint[host]
+	return d.mapHostToEndpoint[host], nil
 }
 
 func (d *discovery) refreshEndpoints() {
@@ -83,12 +86,10 @@ func (d *discovery) addEndpoint(host string) {
 	d.mapHostToEndpoint[host] = d.newEndpointFunc(host)
 }
 
-func (d *discovery) delEndpoint(host string) error {
+func (d *discovery) delEndpoint(host string) {
 	d.consistent.Remove(host)
 
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	delete(d.mapHostToEndpoint, host)
-
-	return nil
 }
