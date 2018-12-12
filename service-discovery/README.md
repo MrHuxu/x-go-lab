@@ -32,3 +32,5 @@ A experimental project about service discovery.
         go run main.go -port=1236 -sign=3
 
 After all of the steps above, just check the output of client, it will show you the RPC results, which are returned the services **discovered** by the `discovery` module.
+
+![](https://raw.githubusercontent.com/MrHuxu/x-go-lab/master/service-discovery/service%20discovery.gif)
