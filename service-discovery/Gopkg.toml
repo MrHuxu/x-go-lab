@@ -33,6 +33,10 @@
   name = "stathat.com/c/consistent"
   version = "1.0.0"
 
+[[override]]
+  name = "github.com/golang/protobuf"
+  branch = "master"
+
 [prune]
   go-tests = true
   unused-packages = true

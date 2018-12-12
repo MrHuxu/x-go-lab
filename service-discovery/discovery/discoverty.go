@@ -5,8 +5,8 @@ import (
 	"log"
 	"sync"
 
+	"github.com/coreos/etcd/mvcc/mvccpb"
 	"go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/mvcc/mvccpb"
 	"stathat.com/c/consistent"
 )
 
