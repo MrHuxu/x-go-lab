@@ -38,13 +38,13 @@ func main() {
 func invokeService(d discovery.Discovery, seq int) {
 	endpoint, err := d.Get(strconv.Itoa(seq))
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("fetch endpoint error:", err)
 		return
 	}
 
 	client, err := endpoint.Client()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("fetch client error:", err)
 		return
 	}
 

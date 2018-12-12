@@ -21,6 +21,6 @@ type Service struct {
 
 // SayHello ...
 func (s *Service) SayHello(args *Args, rep *Reply) error {
-	rep.Msg = fmt.Sprintf("This is a hello from server %s to client %d", s.Sign, args.Seq)
+	rep.Msg = fmt.Sprintf("This is a message from server %s to client %d", s.Sign, args.Seq)
 	return nil
 }
