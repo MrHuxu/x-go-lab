@@ -11,10 +11,9 @@ A experimental project about service discovery.
 
 1. `proto`: service definitions
 2. `discovery`: implementation of service discovery
-3. `server`: launch and register/unregister services  
-    args:
-      - port: listening port of the TCP server
-      - sign: signature of a service
+3. `server`: launch and register/unregister services, the program has two flags:
+      - port: port of the TCP server
+      - sign: signature of the service
 4. `client`: launch several clients to request registerd servers concurrently
 
 ## Usage
@@ -31,6 +30,6 @@ A experimental project about service discovery.
         go run main.go -port=1235 -sign=2
         go run main.go -port=1236 -sign=3
 
-After all of the steps above, just check the output of client, it will show you the RPC results, which are returned the services **discovered** by the `discovery` module.
+After all of the steps above, just check the output of client, it will show you the RPC results, which are returned by the services **discovered** by the `discovery` module.
 
 ![](https://raw.githubusercontent.com/MrHuxu/x-go-lab/master/service-discovery/service%20discovery.gif)
