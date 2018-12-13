@@ -24,7 +24,7 @@ func New(fn newEndpointFunc) Discovery {
 		consistent:        consistent.New(),
 	}
 	d.refreshEndpoints()
-	go d.monitorEndpoints()
+	go d.monitorRegistry()
 
 	return d
 }
@@ -39,7 +39,6 @@ type discovery struct {
 }
 
 func (d *discovery) Get(key string) (Endpoint, error) {
-	d.consistent.Get(key)
 	host, err := d.consistent.Get(key)
 	if err != nil {
 		return nil, err
@@ -62,7 +61,7 @@ func (d *discovery) refreshEndpoints() {
 	}
 }
 
-func (d *discovery) monitorEndpoints() {
+func (d *discovery) monitorRegistry() {
 	watchCh := etcdClient.Watch(context.Background(), etcdPrefix, clientv3.WithPrefix())
 
 	for response := range watchCh {
