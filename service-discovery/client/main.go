@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"sync"
 	"time"
 
@@ -36,7 +35,7 @@ func main() {
 }
 
 func invokeService(d discovery.Discovery, seq int) {
-	endpoint, err := d.Get(strconv.Itoa(seq))
+	endpoint, err := d.Get(fmt.Sprintf("%d_%d", seq, time.Now().UnixNano()))
 	if err != nil {
 		fmt.Println("fetch endpoint error:", err)
 		return
