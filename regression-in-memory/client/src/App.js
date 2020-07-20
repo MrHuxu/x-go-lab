@@ -44,7 +44,7 @@ class App extends Component {
                 </tr>
               </thead>
               <tbody>
-                {this.state.data.map(d => (
+                {(this.state.data || []).map(d => (
                   <tr key={d.id}>
                     <td style={{ padding: 5 }}>{d.name}</td>
                     <td style={{ padding: 5 }}>{d.age}</td>
