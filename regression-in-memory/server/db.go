@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/jinzhu/gorm"
+	"database/sql"
+
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-var db *gorm.DB
+var db *sql.DB
 
 func initDB() {
 	var err error
-	db, err = gorm.Open("mysql", "root:@/regression?charset=utf8&parseTime=True&loc=Local")
+
+	db, err = sql.Open("mysql", "root:@/regression")
 	if err != nil {
 		panic(err)
 	}
