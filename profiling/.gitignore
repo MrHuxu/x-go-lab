@@ -1,0 +1,3 @@
+scripts/*.perf
+scripts/*.folded
+scripts/*.svg
